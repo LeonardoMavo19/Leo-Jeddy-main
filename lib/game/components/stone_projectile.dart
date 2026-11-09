@@ -14,17 +14,20 @@ class StoneProjectile extends CircleComponent {
          position: position,
          anchor: Anchor.center,
          priority: 4,
-         paint: Paint()..color = const Color(0xFFB7A18A),
+         paint: Paint()..color = Colors.transparent,
        );
 
   static const double speed = 390;
   final Vector2 _velocity;
   final ValueChanged<Enemy> onHit;
+  double rotationAngle = 0;
+  static const double spinRate = 14;
 
   @override
   void update(double dt) {
     super.update(dt);
     position.add(_velocity * dt);
+    rotationAngle += spinRate * dt;
 
     for (final enemy in findGame()!.world.children.whereType<Enemy>()) {
       final closestX = position.x.clamp(enemy.hitboxLeft, enemy.hitboxRight);
@@ -36,7 +39,8 @@ class StoneProjectile extends CircleComponent {
       }
     }
 
-    final gameSize = findGame()!.size * 3;
+    final game = findGame();
+    final gameSize = game != null ? game.size * 3 : Vector2.all(99999);
     if (position.x < 0 ||
         position.x > gameSize.x ||
         position.y < 0 ||
@@ -47,11 +51,89 @@ class StoneProjectile extends CircleComponent {
 
   @override
   void render(Canvas canvas) {
-    super.render(canvas);
-    canvas.drawCircle(
-      Offset(radius * 0.32, -radius * 0.3),
-      radius * 0.28,
-      Paint()..color = const Color(0xFFFFE2B9),
+    canvas.save();
+    canvas.translate(radius, radius);
+    canvas.rotate(rotationAngle);
+
+    final r = radius;
+
+    // Vértices de piedra facetada irregular
+    final p1 = Offset(-r * 0.85, -r * 0.55);
+    final p2 = Offset(-r * 0.25, -r * 0.95);
+    final p3 = Offset(r * 0.65, -r * 0.80);
+    final p4 = Offset(r * 0.95, -r * 0.15);
+    final p5 = Offset(r * 0.75, r * 0.70);
+    final p6 = Offset(r * 0.10, r * 0.95);
+    final p7 = Offset(-r * 0.70, r * 0.75);
+    final p8 = Offset(-r * 0.95, r * 0.05);
+
+    final rockPath = Path()
+      ..moveTo(p1.dx, p1.dy)
+      ..lineTo(p2.dx, p2.dy)
+      ..lineTo(p3.dx, p3.dy)
+      ..lineTo(p4.dx, p4.dy)
+      ..lineTo(p5.dx, p5.dy)
+      ..lineTo(p6.dx, p6.dy)
+      ..lineTo(p7.dx, p7.dy)
+      ..lineTo(p8.dx, p8.dy)
+      ..close();
+
+    // Cuerpo base rocoso (gris granito medio)
+    canvas.drawPath(rockPath, Paint()..color = const Color(0xFF726F6C));
+
+    // Faceta de sombra inferior
+    final shadowFacet = Path()
+      ..moveTo(0, 0)
+      ..lineTo(p4.dx, p4.dy)
+      ..lineTo(p5.dx, p5.dy)
+      ..lineTo(p6.dx, p6.dy)
+      ..lineTo(p7.dx, p7.dy)
+      ..close();
+    canvas.drawPath(shadowFacet, Paint()..color = const Color(0xFF454240));
+
+    // Faceta de iluminación superior
+    final lightFacet = Path()
+      ..moveTo(0, 0)
+      ..lineTo(p1.dx, p1.dy)
+      ..lineTo(p2.dx, p2.dy)
+      ..lineTo(p3.dx, p3.dy)
+      ..close();
+    canvas.drawPath(lightFacet, Paint()..color = const Color(0xFFAAA5A0));
+
+    // Resaltado superior brillante
+    final highlightFacet = Path()
+      ..moveTo(0, 0)
+      ..lineTo(p2.dx, p2.dy)
+      ..lineTo(p3.dx * 0.7, p3.dy * 0.7)
+      ..close();
+    canvas.drawPath(highlightFacet, Paint()..color = const Color(0xFFC8C3BD));
+
+    // Grietas minerales oscuras
+    final crackPaint = Paint()
+      ..color = const Color(0xFF302E2C)
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
+    canvas.drawLine(Offset.zero, Offset(p1.dx * 0.7, p1.dy * 0.7), crackPaint);
+    canvas.drawLine(Offset.zero, Offset(p5.dx * 0.75, p5.dy * 0.75), crackPaint);
+    canvas.drawLine(
+      Offset(p2.dx * 0.5, p2.dy * 0.5),
+      Offset(p8.dx * 0.5, p8.dy * 0.5),
+      crackPaint,
     );
+
+    // Motas minerales
+    canvas.drawCircle(Offset(r * 0.25, -r * 0.2), 0.7, Paint()..color = const Color(0xFFE5E2DC));
+    canvas.drawCircle(Offset(-r * 0.1, -r * 0.4), 0.6, Paint()..color = const Color(0xFF262422));
+
+    // Contorno rocoso fino
+    canvas.drawPath(
+      rockPath,
+      Paint()
+        ..color = const Color(0xFF383533)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0,
+    );
+
+    canvas.restore();
   }
 }

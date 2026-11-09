@@ -9,15 +9,20 @@ import 'components/enemy.dart';
 import 'components/fear_projectile.dart';
 import 'components/forest_background.dart';
 import 'components/hitbox_component.dart';
+import 'components/night_lighting.dart';
 import 'components/player.dart';
 import 'components/stone_projectile.dart';
 import 'components/tree.dart';
 
 class SurvivorsGame extends FlameGame {
   static const hudOverlay = 'hud';
+  static const vignetteOverlay = 'vignette';
+  static const minimapOverlay = 'minimap';
   static const joystickOverlay = 'joystick';
   static const aimingJoystickOverlay = 'aimingJoystick';
   static const gameOverOverlay = 'gameOver';
+
+  static const double worldScale = 1.7;
 
   final ValueNotifier<int> fear = ValueNotifier<int>(0);
   final ValueNotifier<int> elapsedSeconds = ValueNotifier<int>(0);
@@ -38,14 +43,14 @@ class SurvivorsGame extends FlameGame {
   bool get isGameOver => _isGameOver;
 
   @override
-  Color backgroundColor() => const Color(0xFF294B35);
+  Color backgroundColor() => const Color(0xFF070E0C);
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
 
     camera.viewfinder.anchor = Anchor.center;
-    worldSize = size * 3;
+    worldSize = size * worldScale;
 
     world.add(ForestBackground(size: worldSize));
     for (final (xRatio, yRatio, scale) in ForestBackground.trees) {
@@ -59,6 +64,7 @@ class SurvivorsGame extends FlameGame {
     player = Player(movementInput: movementInput, position: worldSize / 2);
 
     world.add(player);
+    world.add(NightLighting(worldSize: worldSize));
     camera.setBounds(
       Rectangle.fromLTRB(0, 0, worldSize.x, worldSize.y),
       considerViewport: true,
