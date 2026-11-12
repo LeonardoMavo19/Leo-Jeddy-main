@@ -8,20 +8,28 @@ class StoneProjectile extends CircleComponent {
     required Vector2 position,
     required Vector2 direction,
     required this.onHit,
-  }) : _velocity = direction * speed,
+    double radius = 7,
+    double projectileSpeed = 390,
+    this.pierce = 1,
+    this.bounce = 0,
+  }) : _speed = projectileSpeed,
+       _velocity = direction * projectileSpeed,
        super(
-         radius: 7,
+         radius: radius,
          position: position,
          anchor: Anchor.center,
          priority: 4,
          paint: Paint()..color = Colors.transparent,
        );
 
-  static const double speed = 390;
-  final Vector2 _velocity;
+  final double _speed;
+  Vector2 _velocity;
   final ValueChanged<Enemy> onHit;
   double rotationAngle = 0;
   static const double spinRate = 14;
+  int pierce;
+  int bounce;
+  final Set<Enemy> _hitEnemies = {};
 
   @override
   void update(double dt) {
@@ -29,18 +37,50 @@ class StoneProjectile extends CircleComponent {
     position.add(_velocity * dt);
     rotationAngle += spinRate * dt;
 
-    for (final enemy in findGame()!.world.children.whereType<Enemy>()) {
+    final game = findGame();
+    if (game == null) return;
+
+    for (final enemy in game.world.children.whereType<Enemy>()) {
+      if (_hitEnemies.contains(enemy)) continue;
       final closestX = position.x.clamp(enemy.hitboxLeft, enemy.hitboxRight);
       final closestY = position.y.clamp(enemy.hitboxTop, enemy.hitboxBottom);
       if (position.distanceTo(Vector2(closestX, closestY)) <= radius) {
+        _hitEnemies.add(enemy);
         onHit(enemy);
-        removeFromParent();
-        return;
+        pierce--;
+
+        if (pierce <= 0) {
+          if (bounce > 0) {
+            bounce--;
+            pierce = 1;
+            // Buscar enemigo más cercano
+            Enemy? nearest;
+            double minDist = double.infinity;
+            for (final other in game.world.children.whereType<Enemy>()) {
+              if (other != enemy && !_hitEnemies.contains(other)) {
+                final d = position.distanceTo(other.position);
+                if (d < minDist) {
+                  minDist = d;
+                  nearest = other;
+                }
+              }
+            }
+            if (nearest != null) {
+              final newDir = (nearest.position - position).normalized();
+              _velocity = newDir * _speed;
+            } else {
+              removeFromParent();
+              return;
+            }
+          } else {
+            removeFromParent();
+            return;
+          }
+        }
       }
     }
 
-    final game = findGame();
-    final gameSize = game != null ? game.size * 3 : Vector2.all(99999);
+    final gameSize = game.size * 3;
     if (position.x < 0 ||
         position.x > gameSize.x ||
         position.y < 0 ||

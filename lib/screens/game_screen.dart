@@ -5,6 +5,7 @@ import '../game/survivors_game.dart';
 import '../game/widgets/game_over_overlay.dart';
 import '../game/widgets/hud_overlay.dart';
 import '../game/widgets/minimap_overlay.dart';
+import '../game/widgets/upgrade_overlay.dart';
 import '../game/widgets/virtual_joystick_overlay.dart';
 
 class GameScreen extends StatefulWidget {
@@ -60,6 +61,8 @@ class _GameScreenState extends State<GameScreen> {
               VirtualJoystickOverlay(game: game, isAiming: true),
           SurvivorsGame.gameOverOverlay: (context, game) =>
               GameOverOverlay(game: game),
+          SurvivorsGame.upgradeOverlay: (context, game) =>
+              UpgradeOverlay(game: game),
         },
         initialActiveOverlays: const [
           SurvivorsGame.vignetteOverlay,

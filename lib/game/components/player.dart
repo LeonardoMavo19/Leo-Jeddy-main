@@ -22,6 +22,27 @@ class Player extends HitboxComponent {
   double walkTimer = 0;
   bool isMoving = false;
 
+  // Atributos de mejoras (Upgrades)
+  int projectileCount = 1;
+  double fireCooldown = 0.38;
+  double speedMultiplier = 1.0;
+  double stoneRadius = 7.0;
+  int stonePierce = 1;
+  int stoneBounce = 0;
+  double stoneSpeed = 390.0;
+  double fearResistance = 1.0;
+
+  void resetUpgrades() {
+    projectileCount = 1;
+    fireCooldown = 0.38;
+    speedMultiplier = 1.0;
+    stoneRadius = 7.0;
+    stonePierce = 1;
+    stoneBounce = 0;
+    stoneSpeed = 390.0;
+    fearResistance = 1.0;
+  }
+
   @override
   void update(double dt) {
     super.update(dt);
@@ -34,7 +55,8 @@ class Player extends HitboxComponent {
       isMoving = false;
     }
 
-    final nextPosition = position + movementInput * speed * dt;
+    final effectiveSpeed = speed * speedMultiplier;
+    final nextPosition = position + movementInput * effectiveSpeed * dt;
 
     final game = findGame()! as SurvivorsGame;
     final worldSize = game.worldSize;
