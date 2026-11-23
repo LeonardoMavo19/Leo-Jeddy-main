@@ -83,13 +83,13 @@ const List<VenezuelanBossData> venezuelanBosses = [
   ),
   VenezuelanBossData(
     id: 'el_cabron',
-    name: 'EL CABRÓN LEYENDARIO',
-    subtitle: 'La bestia cornuda de los montes',
-    lore: 'Blande su temible machete con furia infernal',
-    baseHp: 48,
-    speed: 56,
-    scale: 1.7,
-    shotType: 'cabron',
+    name: 'EL CAMBIAFORMAS',
+    subtitle: 'La bestia salvaje de los montes',
+    lore: 'Corre en feroz embestida y ataca con brutales garras',
+    baseHp: 52,
+    speed: 64,
+    scale: 1.85,
+    shotType: 'melee',
     assetKey: 'el_cabron',
     color: Color(0xFFFF594D),
   ),
@@ -361,14 +361,10 @@ class SurvivorsGame extends FlameGame {
       }
     }
 
-    if (aimInput.length2 > 0) {
-      _stoneCooldown -= dt;
-      if (_stoneCooldown <= 0) {
-        _throwStone();
-        _stoneCooldown = player.fireCooldown;
-      }
-    } else {
-      _stoneCooldown = 0;
+    _stoneCooldown = max(0.0, _stoneCooldown - dt);
+    if (aimInput.length2 > 0 && _stoneCooldown <= 0) {
+      _throwStone();
+      _stoneCooldown = player.fireCooldown;
     }
   }
 

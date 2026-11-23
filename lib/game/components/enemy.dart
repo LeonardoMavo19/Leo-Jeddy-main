@@ -370,20 +370,24 @@ class Enemy extends HitboxComponent {
       canvas.save();
       canvas.translate(0, -bob);
 
-      // Torso fornido con pelaje espeso
-      canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-15, -40, 30, 26), const Radius.circular(7)), Paint()..color = const Color(0xFF33241C));
-      canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-13, -38, 26, 22), const Radius.circular(5)), Paint()..color = const Color(0xFF4D3326));
+      // Torso fornido hipertrofiado con pelaje espeso
+      canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-16, -42, 32, 28), const Radius.circular(8)), Paint()..color = const Color(0xFF33241C));
+      canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-13, -39, 26, 23), const Radius.circular(6)), Paint()..color = const Color(0xFF4D3326));
 
-      // Zurrón de cuero cruzado con hebilla de latón
-      canvas.drawLine(const Offset(-14, -38), const Offset(12, -22), Paint()..color = const Color(0xFF7A4724)..strokeWidth = 3);
-      canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(8, -26, 10, 10), const Radius.circular(2)), Paint()..color = const Color(0xFF7A4724));
-      canvas.drawRect(const Rect.fromLTWH(11, -23, 4, 4), Paint()..color = const Color(0xFFD9B34D)..style = PaintingStyle.stroke..strokeWidth = 1);
+      // Brazos musculosos de bestia con garras negras y puntas carmesí (SIN MACHETE NI MORRAL)
+      // Brazo izquierdo con garras
+      canvas.drawPath(_poly(const [Offset(-15, -38), Offset(-24, -22), Offset(-18, -20), Offset(-11, -34)]), Paint()..color = const Color(0xFF3D291F));
+      canvas.drawPath(_poly(const [Offset(-24, -22), Offset(-28, -17), Offset(-22, -19)]), Paint()..color = const Color(0xFF0F0A0A));
+      canvas.drawPath(_poly(const [Offset(-21, -20), Offset(-25, -15), Offset(-19, -18)]), Paint()..color = const Color(0xFF0F0A0A));
 
-      // Brazo y Gran Machete plateado
-      canvas.drawLine(const Offset(14, -36), const Offset(20, -24), Paint()..color = const Color(0xFF3D291F)..strokeWidth = 4);
-      // Machete
-      canvas.drawPath(_poly(const [Offset(22, -27), Offset(36, -42), Offset(40, -38), Offset(24, -23)]), Paint()..color = const Color(0xFFD9E0F0));
-      canvas.drawLine(const Offset(22, -27), const Offset(36, -42), Paint()..color = Colors.white..strokeWidth = 1.2);
+      // Brazo derecho con garras de ataque
+      canvas.drawPath(_poly(const [Offset(14, -38), Offset(26, -22), Offset(21, -18), Offset(11, -34)]), Paint()..color = const Color(0xFF472E24));
+      canvas.drawPath(_poly(const [Offset(26, -22), Offset(32, -26), Offset(26, -19)]), Paint()..color = const Color(0xFF0F0A0A));
+      canvas.drawPath(_poly(const [Offset(24, -19), Offset(30, -22), Offset(24, -16)]), Paint()..color = const Color(0xFF0F0A0A));
+      canvas.drawPath(_poly(const [Offset(22, -16), Offset(27, -18), Offset(21, -13)]), Paint()..color = const Color(0xFF0F0A0A));
+      // Destello carmesí en la punta de las garras
+      canvas.drawCircle(const Offset(32, -26), 1.5, Paint()..color = const Color(0xFFFF2B2B));
+      canvas.drawCircle(const Offset(30, -22), 1.5, Paint()..color = const Color(0xFFFF2B2B));
 
       // Cabeza y cuernos retorcidos
       canvas.drawCircle(const Offset(0, -46), 11, Paint()..color = const Color(0xFF2E1F1A));

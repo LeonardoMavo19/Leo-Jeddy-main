@@ -1,83 +1,279 @@
+local BOSS_LEGENDARY_SKILLS = {
+  el_silbon = {
+    id = "boss_silbon",
+    bossId = "el_silbon",
+    name = "Silbido del Silbon",
+    category = "HABILIDAD DE JEFE",
+    icon = "[SILBATO]",
+    color = { 0.96, 0.85, 0.35 },
+    desc = "Emites el silbido ancestral llanero cada 7s: una espiral dorada que paraliza a los monstruos en pantalla por 2.5s.",
+    apply = function(player, game)
+      player.bossSkills = player.bossSkills or {}
+      player.bossSkills["boss_silbon"] = true
+    end,
+  },
+  la_llorona = {
+    id = "boss_llorona",
+    bossId = "la_llorona",
+    name = "Alarido de la Llorona",
+    category = "HABILIDAD DE JEFE",
+    icon = "[LLANTO]",
+    color = { 0.45, 0.85, 1.00 },
+    desc = "Al recibir miedo o cada 8s, desatas un grito desgarrador con tsunami de agua cian que empuja enemigos y baja 30% de miedo.",
+    apply = function(player, game)
+      player.bossSkills = player.bossSkills or {}
+      player.bossSkills["boss_llorona"] = true
+    end,
+  },
+  el_cabron = {
+    id = "boss_cabron",
+    bossId = "el_cabron",
+    name = "Garras del Cambiaformas",
+    category = "HABILIDAD DE JEFE",
+    icon = "[GARRAS]",
+    color = { 1.00, 0.35, 0.28 },
+    desc = "Tus piedras se convierten en zarpazos carmesi ardientes con perforacion infinita y empuje descomunal (+150%).",
+    apply = function(player, game)
+      player.bossSkills = player.bossSkills or {}
+      player.bossSkills["boss_cabron"] = true
+    end,
+  },
+  duendes = {
+    id = "boss_duendes",
+    bossId = "duendes",
+    name = "Fortuna y Evasion Duende",
+    category = "HABILIDAD DE JEFE",
+    icon = "[DUENDE]",
+    color = { 0.48, 0.95, 0.45 },
+    desc = "Enemigos derrotados sueltan pepitas de oro curativas y tienes un 35% de probabilidad de esquivar golpes teletransportandote.",
+    apply = function(player, game)
+      player.bossSkills = player.bossSkills or {}
+      player.bossSkills["boss_duendes"] = true
+    end,
+  },
+  las_animas = {
+    id = "boss_animas",
+    bossId = "las_animas",
+    name = "Cirio Protector de las Animas",
+    category = "HABILIDAD DE JEFE",
+    icon = "[CIRIO]",
+    color = { 0.88, 0.94, 0.98 },
+    desc = "Un cirio bendito te orbita permanentemente quemando monstruos cercanos e impidiendo la derrota si el miedo llega al 100%.",
+    apply = function(player, game)
+      player.bossSkills = player.bossSkills or {}
+      player.bossSkills["boss_animas"] = true
+    end,
+  },
+  brujas = {
+    id = "boss_brujas",
+    bossId = "brujas",
+    name = "Estrellas del Aquelarre",
+    category = "HABILIDAD DE JEFE",
+    icon = "[ESTRELLAS]",
+    color = { 0.88, 0.48, 0.98 },
+    desc = "Cada piedra que lanzas dispara 2 estrellas magicas moradas teledirigidas que persiguen a los monstruos automaticamente.",
+    apply = function(player, game)
+      player.bossSkills = player.bossSkills or {}
+      player.bossSkills["boss_brujas"] = true
+    end,
+  },
+}
+
 local UPGRADE_CATALOG = {
   {
+    id = "morral_ampliado",
+    name = "Morral Campesino",
+    category = "MUNICION",
+    maxLevel = 4,
+    getDesc = function(lvl)
+      local add = lvl == 1 and "+2 piedras" or (lvl == 2 and "+3 piedras" or "+4 piedras")
+      return "Aumenta la capacidad maxima de piedras en el morral (" .. add .. ")."
+    end,
+    apply = function(player, game, lvl)
+      player.maxStones = (player.maxStones or 5) + (lvl == 1 and 2 or (lvl == 2 and 3 or 4))
+      player.stones = player.maxStones
+    end,
+  },
+  {
+    id = "recarga_veloz",
+    name = "Manos Agiles",
+    category = "MUNICION",
+    maxLevel = 3,
+    getDesc = function(lvl)
+      return "Recargas piedras un " .. (lvl * 30) .. "% mas rapido en tu morral."
+    end,
+    apply = function(player, game, lvl)
+      player.reloadInterval = math.max(0.25, (player.reloadInterval or 0.85) * 0.70)
+    end,
+  },
+  {
     id = "multi_stone",
-    name = "Lluvia de Piedras",
+    name = "Lluvia de Cascajo",
     category = "OFENSIVA",
-    icon = "[3x]",
-    desc = "Lanzas +1 piedra adicional por disparo en abanico.",
-    apply = function(player, game)
+    maxLevel = 3,
+    getDesc = function(lvl)
+      return "Lanzas +" .. lvl .. " piedra(s) adicional(es) por disparo en abanico."
+    end,
+    apply = function(player, game, lvl)
       player.projectileCount = (player.projectileCount or 1) + 1
     end,
   },
   {
     id = "rapid_fire",
-    name = "Brazos Veloces",
+    name = "Lanzamiento Rapido",
     category = "CADENCIA",
-    icon = "[>>]",
-    desc = "Disparas piedras un 28% más rápido.",
-    apply = function(player, game)
-      player.fireCooldown = math.max(0.12, (player.fireCooldown or 0.38) * 0.72)
+    maxLevel = 3,
+    getDesc = function(lvl)
+      return "Cadencia de disparo +" .. (lvl * 25) .. "% (menor tiempo entre tiros)."
+    end,
+    apply = function(player, game, lvl)
+      player.fireCooldown = math.max(0.12, (player.fireCooldown or 0.38) * 0.75)
     end,
   },
   {
-    id = "swift_boots",
-    name = "Zapatos Ligeros",
-    category = "MOVILIDAD",
-    icon = "[^^]",
-    desc = "Velocidad de movimiento del niño +22%.",
-    apply = function(player, game)
-      player.speed = (player.speed or 160) * 1.22
+    id = "roca_afilada",
+    name = "Guijarros Afilados",
+    category = "OFENSIVA",
+    maxLevel = 3,
+    getDesc = function(lvl)
+      return "Tus piedras perforan +" .. lvl .. " enemigo(s) adicional(es) antes de romperse."
     end,
-  },
-  {
-    id = "heavy_rocks",
-    name = "Roca Volcánica",
-    category = "POTENCIA",
-    icon = "[##]",
-    desc = "Piedras más grandes que perforan +1 enemigo.",
-    apply = function(player, game)
-      player.stoneRadius = (player.stoneRadius or 7) + 2.5
+    apply = function(player, game, lvl)
       player.stonePierce = (player.stonePierce or 1) + 1
     end,
   },
   {
-    id = "fear_calm",
-    name = "Mente Serena",
-    category = "SUPERVIVENCIA",
-    icon = "[++]",
-    desc = "Disminuye el Miedo acumulado un 40%.",
-    apply = function(player, game)
-      game.fear = math.max(0, game.fear - 40)
-      player.fearResistance = (player.fearResistance or 1.0) * 0.8
+    id = "heavy_rocks",
+    name = "Penasco Contundente",
+    category = "POTENCIA",
+    maxLevel = 3,
+    getDesc = function(lvl)
+      return "Piedras mas pesadas (" .. (lvl * 35) .. "% mas grandes) que empujan monstruos."
+    end,
+    apply = function(player, game, lvl)
+      player.stoneRadius = (player.stoneRadius or 7) + 2.5
+      player.stoneKnockback = (player.stoneKnockback or 1.0) + 0.6
     end,
   },
   {
     id = "stone_speed",
-    name = "Honda Reforzada",
+    name = "Honda Llanera",
     category = "ALCANCE",
-    icon = "[!!]",
-    desc = "Velocidad de proyectil +35% y mayor alcance.",
-    apply = function(player, game)
-      player.stoneSpeed = (player.stoneSpeed or 390) * 1.35
+    maxLevel = 3,
+    getDesc = function(lvl)
+      return "Mayor tension en la honda: velocidad de tiro +" .. (lvl * 30) .. "%."
+    end,
+    apply = function(player, game, lvl)
+      player.stoneSpeed = (player.stoneSpeed or 390) * 1.30
     end,
   },
   {
     id = "ricochet",
-    name = "Piedra Rebotadora",
+    name = "Rebote de Rio",
     category = "TACTICA",
-    icon = "[~~]",
-    desc = "Tus piedras rebotan hacia otro monstruo cercano.",
-    apply = function(player, game)
+    maxLevel = 2,
+    getDesc = function(lvl)
+      return "Tus piedras rebotan hacia otro monstruo cercano tras el impacto."
+    end,
+    apply = function(player, game, lvl)
       player.stoneBounce = (player.stoneBounce or 0) + 1
+    end,
+  },
+  {
+    id = "swift_boots",
+    name = "Alpargatas Ligeras",
+    category = "MOVILIDAD",
+    maxLevel = 3,
+    getDesc = function(lvl)
+      return "Velocidad de movimiento del nino +" .. (lvl * 18) .. "%."
+    end,
+    apply = function(player, game, lvl)
+      player.speed = (player.speed or 160) * 1.18
+    end,
+  },
+  {
+    id = "sprint_emergencia",
+    name = "Escape del Asombro",
+    category = "MOVILIDAD",
+    maxLevel = 2,
+    getDesc = function(lvl)
+      return "Si un enemigo esta a menos de 80px, corres un 45% mas rapido para huir."
+    end,
+    apply = function(player, game, lvl)
+      player.emergencySprint = true
+    end,
+  },
+  {
+    id = "fear_calm",
+    name = "Respiracion Serena",
+    category = "SUPERVIVENCIA",
+    maxLevel = 3,
+    getDesc = function(lvl)
+      return "Disminuye el Miedo acumulado un 40% y recibes 25% menos de miedo."
+    end,
+    apply = function(player, game, lvl)
+      game.fear = math.max(0, game.fear - 40)
+      player.fearResistance = (player.fearResistance or 1.0) * 0.75
+    end,
+  },
+  {
+    id = "oracion_abuela",
+    name = "Oracion de la Abuela",
+    category = "SUPERVIVENCIA",
+    maxLevel = 3,
+    getDesc = function(lvl)
+      return "Proteccion divina: reduce todo el dano de Miedo recibido un " .. (lvl * 20) .. "%."
+    end,
+    apply = function(player, game, lvl)
+      player.fearResistance = (player.fearResistance or 1.0) * 0.80
+    end,
+  },
+  {
+    id = "candil_luciernagas",
+    name = "Farol de Luciernagas",
+    category = "SUPERVIVENCIA",
+    maxLevel = 2,
+    getDesc = function(lvl)
+      return "Amplia el circulo de luz nocturna y ralentiza a los monstruos cercanos."
+    end,
+    apply = function(player, game, lvl)
+      player.lightRadiusBonus = (player.lightRadiusBonus or 0) + 40
+      player.slowAura = true
+    end,
+  },
+  {
+    id = "azabache_protector",
+    name = "Amuleto de Azabache",
+    category = "SUPERVIVENCIA",
+    maxLevel = 2,
+    getDesc = function(lvl)
+      return "Emite un pulso protector cada 6s que repele a los monstruos cercanos."
+    end,
+    apply = function(player, game, lvl)
+      player.hasAmulet = true
+    end,
+  },
+  {
+    id = "rastreador_piedras",
+    name = "Ojo de Explorador",
+    category = "MUNICION",
+    maxLevel = 2,
+    getDesc = function(lvl)
+      return "Los monstruos derrotados siempre sueltan piedras en el suelo para recargar."
+    end,
+    apply = function(player, game, lvl)
+      player.stoneDropBonus = (player.stoneDropBonus or 0) + 0.5
     end,
   },
   {
     id = "vital_relief",
     name = "Coraje Heroico",
     category = "SUPERVIVENCIA",
-    icon = "[**]",
-    desc = "Limpia TODO el miedo a 0% de inmediato.",
-    apply = function(player, game)
+    maxLevel = 2,
+    getDesc = function(lvl)
+      return "Limpia TODO el miedo a 0% de inmediato y cura el alma."
+    end,
+    apply = function(player, game, lvl)
       game.fear = 0
     end,
   },
@@ -198,17 +394,49 @@ end
 
 local function pick3RandomUpgrades()
   local pool = {}
-  for _, u in ipairs(UPGRADE_CATALOG) do
-    table.insert(pool, u)
-  end
+  game.playerUpgrades = game.playerUpgrades or {}
   local result = {}
-  for _ = 1, 3 do
-    if #pool > 0 then
-      local idx = love.math.random(1, #pool)
-      table.insert(result, pool[idx])
-      table.remove(pool, idx)
+
+  -- Si acabamos de vencer a un Boss folclorico, la tarjeta 1 es su HABILIDAD LEGENDARIA
+  if game.defeatedBossReward and BOSS_LEGENDARY_SKILLS[game.defeatedBossReward] then
+    local bSkill = BOSS_LEGENDARY_SKILLS[game.defeatedBossReward]
+    table.insert(result, {
+      id = bSkill.id,
+      bossId = bSkill.bossId,
+      name = bSkill.name,
+      category = bSkill.category,
+      desc = bSkill.desc,
+      icon = bSkill.icon,
+      color = bSkill.color,
+      isBossSkill = true,
+      apply = bSkill.apply,
+    })
+  end
+
+  -- Reunir habilidades normales que aun no hayan alcanzado su nivel maximo
+  for _, u in ipairs(UPGRADE_CATALOG) do
+    local curLvl = game.playerUpgrades[u.id] or 0
+    if curLvl < (u.maxLevel or 3) then
+      local nextLvl = curLvl + 1
+      table.insert(pool, {
+        id = u.id,
+        name = u.name .. (nextLvl > 1 and (" (Nv. " .. nextLvl .. ")") or ""),
+        baseName = u.name,
+        category = u.category,
+        desc = u.getDesc and u.getDesc(nextLvl) or u.desc,
+        level = nextLvl,
+        maxLevel = u.maxLevel or 3,
+        apply = u.apply,
+      })
     end
   end
+
+  while #result < 3 and #pool > 0 do
+    local idx = love.math.random(1, #pool)
+    table.insert(result, pool[idx])
+    table.remove(pool, idx)
+  end
+
   return result
 end
 
@@ -229,23 +457,23 @@ local VENEZUELAN_BOSSES = {
     id = "la_llorona",
     name = "LA LLORONA",
     subtitle = "El espectro del rio y los sauces",
-    lore = "Aaaaay mis hijos... Su llanto hiela el bosque",
-    baseHp = 34,
+    lore = "Su alarido hiela el bosque e intenta atraparte con sus manos",
+    baseHp = 36,
     speed = 46,
     scale = 1.6,
-    shotType = "llorona",
+    shotType = "scream_grab",
     assetKey = "la_llorona",
     color = { 0.45, 0.85, 1.00 },
   },
   {
     id = "el_cabron",
-    name = "EL CABRON LEYENDARIO",
-    subtitle = "La bestia cornuda de los montes",
-    lore = "Blande su temible machete con furia infernal",
-    baseHp = 48,
-    speed = 56,
-    scale = 1.7,
-    shotType = "cabron",
+    name = "EL CAMBIAFORMAS",
+    subtitle = "La bestia salvaje de los montes",
+    lore = "Corre en feroz embestida y ataca con brutales garras",
+    baseHp = 52,
+    speed = 64,
+    scale = 1.85,
+    shotType = "melee",
     assetKey = "el_cabron",
     color = { 1.00, 0.35, 0.30 },
   },
@@ -354,6 +582,9 @@ local function startWave(waveNumber)
   game.enemiesDefeated = 0
   game.enemiesSpawned = 0
   game.waveBannerTimer = 3.6
+  if game.player then
+    game.player.animasReviveUsed = false
+  end
   local isBossWave = (game.wave % 5 == 0)
   if isBossWave then
     local bossTier = math.floor(game.wave / 5)
@@ -378,8 +609,15 @@ end
 
 local function selectUpgrade(index)
   local option = game.upgradeOptions and game.upgradeOptions[index]
-  if option and option.apply then
-    option.apply(game.player, game)
+  if option then
+    if option.isBossSkill then
+      if option.apply then option.apply(game.player, game) end
+      game.defeatedBossReward = nil
+    else
+      local nextLvl = (game.playerUpgrades[option.id] or 0) + 1
+      game.playerUpgrades[option.id] = nextLvl
+      if option.apply then option.apply(game.player, game, nextLvl) end
+    end
   end
   startWave(game.wave + 1)
   game.state = "playing"
@@ -407,6 +645,17 @@ local function resetGame()
     stonePierce = 1,
     stoneBounce = 0,
     fearResistance = 1.0,
+    maxStones = 5,
+    stones = 5,
+    reloadInterval = 0.85,
+    reloadTimer = 0,
+    bossSkills = {},
+    emptyPouchFlash = 0,
+    silbonWhistleTimer = 5.0,
+    lloronaTimer = 8.0,
+    lloronaPanicCooldown = 0,
+    candleAngle = 0,
+    animasReviveUsed = false,
   }
   game.fear = 0
   game.elapsed = 0
@@ -414,6 +663,14 @@ local function resetGame()
   game.enemies = {}
   game.stones = {}
   game.fearShots = {}
+  game.droppedPebbles = {}
+  game.duendeTraps = {}
+  game.bossEffects = {}
+  game.groundFlames = {}
+  game.floatingTexts = {}
+  game.screenShake = 0
+  game.playerUpgrades = {}
+  game.defeatedBossReward = nil
   game.touches = {}
   game.leftTouch = nil
   game.rightTouch = nil
@@ -546,6 +803,266 @@ local function movePlayer(dt)
   if not blocked then player.y = nextY end
 end
 
+local function addFloatingText(text, x, y, col)
+  game.floatingTexts = game.floatingTexts or {}
+  table.insert(game.floatingTexts, {
+    text = text,
+    x = x,
+    y = y,
+    col = col or { 1.0, 0.88, 0.30 },
+    life = 1.6,
+  })
+end
+
+local function updateVenezuelanBoss(enemy, dt)
+  local player = game.player
+  local dx, dy = player.x - enemy.x, player.y - enemy.y
+  local dist = length(dx, dy)
+  local normX, normY = 0, 0
+  if dist > 0 then
+    normX, normY = dx / dist, dy / dist
+    enemy.facingX = normX
+    enemy.facingY = normY
+  end
+  enemy.walkTimer = (enemy.walkTimer or 0) + dt * 10
+  enemy.aiTimer = (enemy.aiTimer or 2.8) - dt
+
+  local id = enemy.bossId or "el_silbon"
+
+  if id == "el_cabron" then
+    -- =========================================================================
+    -- EL CAMBIAFORMAS: Bestia salvaje. NO DISPARA PROYECTILES.
+    -- Corre hacia ti en embestida salvaje y te golpea con brutales garras.
+    -- =========================================================================
+    enemy.state = enemy.state or "stalk"
+
+    if enemy.state == "stalk" then
+      local spd = enemy.speed or 64
+      enemy.x = enemy.x + normX * spd * dt
+      enemy.y = enemy.y + normY * spd * dt
+      if enemy.aiTimer <= 0 then
+        enemy.state = "telegraph"
+        enemy.stateTimer = 0.55
+        game.screenShake = 0.15
+      end
+
+    elseif enemy.state == "telegraph" then
+      enemy.stateTimer = enemy.stateTimer - dt
+      if enemy.stateTimer <= 0 then
+        enemy.state = "charge"
+        enemy.stateTimer = 1.15
+        enemy.chargeVx = normX * 240
+        enemy.chargeVy = normY * 240
+        game.screenShake = 0.28
+      end
+
+    elseif enemy.state == "charge" then
+      enemy.stateTimer = enemy.stateTimer - dt
+      enemy.x = enemy.x + enemy.chargeVx * dt
+      enemy.y = enemy.y + enemy.chargeVy * dt
+
+      if love.math.random() < 0.45 then
+        table.insert(game.bossEffects, {
+          kind = "beast_ember",
+          x = enemy.x + (love.math.random() - 0.5) * 24,
+          y = enemy.y + (love.math.random() - 0.5) * 20,
+          life = 0.45,
+        })
+      end
+
+      if dist < 38 then
+        local dmg = math.floor(22 * (player.fearResistance or 1.0))
+        game.fear = math.min(100, game.fear + dmg)
+        player.x = clamp(player.x + normX * 65, 20, game.worldWidth - 20)
+        player.y = clamp(player.y + normY * 65, 40, game.worldHeight - 20)
+        game.screenShake = 0.40
+        table.insert(game.bossEffects, {
+          kind = "claw_slash",
+          x = player.x,
+          y = player.y - 15,
+          life = 0.40,
+        })
+        enemy.state = "fatigue"
+        enemy.stateTimer = 1.3
+        if game.fear >= 100 then game.state = "gameover" end
+      elseif enemy.stateTimer <= 0 then
+        enemy.state = "fatigue"
+        enemy.stateTimer = 1.1
+      end
+
+    elseif enemy.state == "fatigue" then
+      enemy.stateTimer = enemy.stateTimer - dt
+      enemy.x = enemy.x + normX * 26 * dt
+      enemy.y = enemy.y + normY * 26 * dt
+      if enemy.stateTimer <= 0 then
+        enemy.state = "stalk"
+        enemy.aiTimer = 3.2
+      end
+    end
+
+  elseif id == "la_llorona" then
+    -- =========================================================================
+    -- LA LLORONA: No lanza proyectiles normales.
+    -- Lanza alaridos desgarradores e intenta agarrar al nino.
+    -- =========================================================================
+    enemy.state = enemy.state or "drift"
+
+    if enemy.state == "drift" then
+      local spd = enemy.speed or 46
+      enemy.x = enemy.x + normX * spd * dt
+      enemy.y = enemy.y + normY * spd * dt
+      if enemy.aiTimer <= 0 then
+        enemy.state = "scream"
+        enemy.stateTimer = 0.95
+        game.screenShake = 0.22
+        table.insert(game.bossEffects, {
+          kind = "llorona_scream",
+          x = enemy.x,
+          y = enemy.y - 20,
+          radius = 20,
+          maxRadius = 180,
+          life = 0.95,
+        })
+      end
+
+    elseif enemy.state == "scream" then
+      enemy.stateTimer = enemy.stateTimer - dt
+      if dist < 175 then
+        player.x = clamp(player.x + normX * 50 * dt, 20, game.worldWidth - 20)
+        player.y = clamp(player.y + normY * 50 * dt, 40, game.worldHeight - 20)
+        local dmg = math.floor(14 * (player.fearResistance or 1.0) * dt)
+        game.fear = math.min(100, game.fear + dmg)
+      end
+      if enemy.stateTimer <= 0 then
+        enemy.state = "grab_lunge"
+        enemy.stateTimer = 1.6
+      end
+
+    elseif enemy.state == "grab_lunge" then
+      enemy.stateTimer = enemy.stateTimer - dt
+      local lungeSpeed = 150
+      enemy.x = enemy.x + normX * lungeSpeed * dt
+      enemy.y = enemy.y + normY * lungeSpeed * dt
+
+      if dist < 26 then
+        local dmg = math.floor(18 * (player.fearResistance or 1.0))
+        game.fear = math.min(100, game.fear + dmg)
+        player.x = clamp(player.x - normX * 45, 20, game.worldWidth - 20)
+        player.y = clamp(player.y - normY * 45, 40, game.worldHeight - 20)
+        enemy.state = "drift"
+        enemy.aiTimer = 3.6
+        if game.fear >= 100 then game.state = "gameover" end
+      elseif enemy.stateTimer <= 0 then
+        enemy.state = "drift"
+        enemy.aiTimer = 3.2
+      end
+    end
+
+  elseif id == "el_silbon" then
+    -- =========================================================================
+    -- EL SILBON: Silbido macabro y lanzamiento de Femur Boomerang
+    -- =========================================================================
+    local spd = enemy.speed or 52
+    enemy.x = enemy.x + normX * spd * dt
+    enemy.y = enemy.y + normY * spd * dt
+
+    if enemy.aiTimer <= 0 then
+      enemy.aiTimer = 3.4
+      table.insert(game.bossEffects, {
+        kind = "silbon_whistle",
+        x = enemy.x,
+        y = enemy.y - 35,
+        radius = 20,
+        maxRadius = 220,
+        life = 1.2,
+      })
+      table.insert(game.fearShots, {
+        x = enemy.x,
+        y = enemy.y - 25,
+        vx = normX * 190,
+        vy = normY * 190,
+        radius = 12,
+        shotType = "silbon",
+        animTime = 0,
+        isBoomerang = true,
+      })
+    end
+
+  elseif id == "duendes" then
+    -- =========================================================================
+    -- LOS DUENDES: Saltos, trampa de hongos y monedas de oro malditas
+    -- =========================================================================
+    local spd = enemy.speed or 64
+    enemy.x = enemy.x + normX * spd * dt
+    enemy.y = enemy.y + normY * spd * dt
+
+    if enemy.aiTimer <= 0 then
+      enemy.aiTimer = 2.8
+      table.insert(game.duendeTraps, {
+        x = enemy.x,
+        y = enemy.y,
+        life = 25,
+      })
+      for mi = 1, 2 do
+        local mAngle = math.atan2(dy, dx) + (mi == 1 and 0.28 or -0.28)
+        table.insert(game.fearShots, {
+          x = enemy.x,
+          y = enemy.y - 12,
+          vx = math.cos(mAngle) * 210,
+          vy = math.sin(mAngle) * 210,
+          radius = 10,
+          shotType = "duendes",
+          animTime = 0,
+        })
+      end
+    end
+
+  elseif id == "las_animas" then
+    -- =========================================================================
+    -- LAS ANIMAS: Procesion con cirios
+    -- =========================================================================
+    local spd = enemy.speed or 42
+    enemy.x = enemy.x + normX * spd * dt
+    enemy.y = enemy.y + normY * spd * dt
+
+    if enemy.aiTimer <= 0 then
+      enemy.aiTimer = 3.2
+      table.insert(game.fearShots, {
+        x = enemy.x,
+        y = enemy.y - 20,
+        vx = normX * 115,
+        vy = normY * 115,
+        radius = 12,
+        shotType = "animas",
+        animTime = 0,
+      })
+    end
+
+  elseif id == "brujas" then
+    -- =========================================================================
+    -- LAS BRUJAS: Vuelo en escoba y estrellas magicas
+    -- =========================================================================
+    local spd = enemy.speed or 68
+    local perpX, perpY = -normY, normX
+    local wobble = math.sin((game.elapsed or 0) * 4) * 45
+    enemy.x = enemy.x + (normX * spd + perpX * wobble) * dt
+    enemy.y = enemy.y + (normY * spd + perpY * wobble) * dt
+
+    if enemy.aiTimer <= 0 then
+      enemy.aiTimer = 2.6
+      table.insert(game.fearShots, {
+        x = enemy.x,
+        y = enemy.y - 15,
+        vx = normX * 220,
+        vy = normY * 220,
+        radius = 12,
+        shotType = "brujas",
+        animTime = 0,
+      })
+    end
+  end
+end
+
 local function updateGame(dt)
   updateKeyboardInput()
   movePlayer(dt)
@@ -560,57 +1077,273 @@ local function updateGame(dt)
     end
   end
 
+  -- Actualizar enemigos
   for _, enemy in ipairs(game.enemies) do
     if enemy.hitFlash and enemy.hitFlash > 0 then
       enemy.hitFlash = enemy.hitFlash - dt
     end
-    local dx, dy = game.player.x - enemy.x, game.player.y - enemy.y
-    local magnitude = length(dx, dy)
-    if magnitude > 0 then
-      local eSpeed = enemy.speed or 55
-      enemy.x = enemy.x + dx / magnitude * eSpeed * dt
-      enemy.y = enemy.y + dy / magnitude * eSpeed * dt
-      enemy.facingX = dx / magnitude
-      enemy.facingY = dy / magnitude
-      enemy.walkTimer = (enemy.walkTimer or 0) + dt * 11
-    end
-    enemy.shootTimer = enemy.shootTimer - dt
-    if enemy.shootTimer <= 0 then
-      fireFearShot(enemy)
-      enemy.shootTimer = enemy.isBoss and 1.8 or 2.5
+    -- Si el enemigo esta aturdido por el Silbido del Silbon
+    if enemy.stunTimer and enemy.stunTimer > 0 then
+      enemy.stunTimer = enemy.stunTimer - dt
+      -- No se mueve ni ataca mientras esta aturdido
+    elseif enemy.isBoss then
+      updateVenezuelanBoss(enemy, dt)
+    else
+      local dx, dy = game.player.x - enemy.x, game.player.y - enemy.y
+      local magnitude = length(dx, dy)
+      if magnitude > 0 then
+        local eSpeed = enemy.speed or 55
+        enemy.x = enemy.x + dx / magnitude * eSpeed * dt
+        enemy.y = enemy.y + dy / magnitude * eSpeed * dt
+        enemy.facingX = dx / magnitude
+        enemy.facingY = dy / magnitude
+        enemy.walkTimer = (enemy.walkTimer or 0) + dt * 11
+      end
+      enemy.shootTimer = (enemy.shootTimer or 2.5) - dt
+      if enemy.shootTimer <= 0 then
+        fireFearShot(enemy)
+        enemy.shootTimer = 2.5
+      end
     end
   end
 
-  if length(game.aimInput.x, game.aimInput.y) > 0 then
-    game.stoneCooldown = game.stoneCooldown - dt
-    if game.stoneCooldown <= 0 then
-      local count = game.player.projectileCount or 1
-      local speed = game.player.stoneSpeed or 390
-      local baseVx = game.aimInput.x * speed
-      local baseVy = game.aimInput.y * speed
-      local baseAngle = math.atan2(baseVy, baseVx)
-      local spread = 0.22
-      local startAngle = baseAngle - (count - 1) * spread / 2
+  -- =========================================================================
+  -- EJECUCIÓN ACTIVA DE HABILIDADES DE JEFES DESBLOQUEADAS POR EL JUGADOR
+  -- =========================================================================
+  local player = game.player
+  local pSkills = player.bossSkills or {}
 
-      for i = 1, count do
-        local angle = (count == 1) and baseAngle or (startAngle + (i - 1) * spread)
-        table.insert(game.stones, {
-          x = game.player.x,
-          y = game.player.y,
-          vx = math.cos(angle) * speed,
-          vy = math.sin(angle) * speed,
-          radius = game.player.stoneRadius or 7,
-          pierce = game.player.stonePierce or 1,
-          bounce = game.player.stoneBounce or 0,
-          hitEnemies = {},
-          rotation = love.math.random() * math.pi * 2,
-          spin = (love.math.random() > 0.5 and 1 or -1) * (10 + love.math.random() * 8),
-        })
+  -- 1. HABILIDAD DEL SILBÓN: Silbido periódico que aturde a todos los enemigos en pantalla
+  if pSkills["boss_silbon"] then
+    player.silbonWhistleTimer = (player.silbonWhistleTimer or 7.0) - dt
+    if player.silbonWhistleTimer <= 0 then
+      player.silbonWhistleTimer = 7.0
+      addFloatingText("♫ SILBIDO DEL SILBON ♫", player.x, player.y - 45, { 1.0, 0.88, 0.35 })
+      table.insert(game.bossEffects, {
+        kind = "player_silbon_whistle",
+        x = player.x,
+        y = player.y,
+        radius = 20,
+        maxRadius = 320,
+        life = 1.3,
+      })
+      for _, enemy in ipairs(game.enemies) do
+        local distE = length(player.x - enemy.x, player.y - enemy.y)
+        if distE < 320 then
+          enemy.stunTimer = 2.5
+          enemy.hp = (enemy.hp or 1) - 2
+          enemy.hitFlash = 0.25
+        end
       end
-      game.stoneCooldown = game.player.fireCooldown or 0.38
+    end
+  end
+
+  -- 2. HABILIDAD DE LA LLORONA: Alarido defensivo periódico o al subir miedo
+  if pSkills["boss_llorona"] then
+    player.lloronaTimer = (player.lloronaTimer or 8.0) - dt
+    player.lloronaPanicCooldown = math.max(0, (player.lloronaPanicCooldown or 0) - dt)
+    if player.lloronaTimer <= 0 or (game.fear >= 50 and player.lloronaPanicCooldown <= 0) then
+      player.lloronaTimer = 8.0
+      player.lloronaPanicCooldown = 4.5
+      game.fear = math.max(0, game.fear - 30)
+      game.screenShake = 0.35
+      addFloatingText("¡ALARIDO DE LA LLORONA!", player.x, player.y - 45, { 0.45, 0.85, 1.0 })
+      table.insert(game.bossEffects, {
+        kind = "player_llorona_tsunami",
+        x = player.x,
+        y = player.y,
+        radius = 25,
+        maxRadius = 260,
+        life = 1.0,
+      })
+      for _, enemy in ipairs(game.enemies) do
+        local distE = length(player.x - enemy.x, player.y - enemy.y)
+        if distE < 260 then
+          local normEx, normEy = (enemy.x - player.x) / (distE > 0 and distE or 1), (enemy.y - player.y) / (distE > 0 and distE or 1)
+          enemy.x = clamp(enemy.x + normEx * 140, 20, game.worldWidth - 20)
+          enemy.y = clamp(enemy.y + normEy * 140, 40, game.worldHeight - 20)
+          enemy.hp = (enemy.hp or 1) - 2
+          enemy.hitFlash = 0.25
+        end
+      end
+    end
+  end
+
+  -- 3. HABILIDAD DEL CAMBIAFORMAS: Huellas de fuego al correr
+  if pSkills["boss_cabron"] and player.isMoving then
+    player.beastFlameTimer = (player.beastFlameTimer or 0) + dt
+    if player.beastFlameTimer >= 0.18 then
+      player.beastFlameTimer = 0
+      table.insert(game.groundFlames, {
+        x = player.x + (love.math.random() - 0.5) * 12,
+        y = player.y + (love.math.random() - 0.5) * 8,
+        life = 2.0,
+      })
+    end
+  end
+
+  -- 4. HABILIDAD DE LAS ÁNIMAS: Cirio bendito orbitante que quema monstruos cercanos
+  if pSkills["boss_animas"] then
+    player.candleAngle = (player.candleAngle or 0) + dt * 3.2
+    local cx = player.x + math.cos(player.candleAngle) * 65
+    local cy = player.y + math.sin(player.candleAngle) * 65
+    for _, enemy in ipairs(game.enemies) do
+      local distC = length(cx - enemy.x, cy - enemy.y)
+      if distC < 30 then
+        enemy.hp = (enemy.hp or 1) - (4 * dt)
+        enemy.hitFlash = 0.12
+        local cDx, cDy = (enemy.x - cx) / (distC > 0 and distC or 1), (enemy.y - cy) / (distC > 0 and distC or 1)
+        enemy.x = clamp(enemy.x + cDx * 40 * dt, 20, game.worldWidth - 20)
+        enemy.y = clamp(enemy.y + cDy * 40 * dt, 40, game.worldHeight - 20)
+      end
+    end
+  end
+
+  -- Actualizar llamas en el suelo dejadas por las garras del Cambiaformas
+  for fi = #(game.groundFlames or {}), 1, -1 do
+    local fl = game.groundFlames[fi]
+    fl.life = fl.life - dt
+    for _, enemy in ipairs(game.enemies) do
+      local dF = length(fl.x - enemy.x, fl.y - enemy.y)
+      if dF < 22 then
+        enemy.hp = (enemy.hp or 1) - (2.5 * dt)
+        enemy.hitFlash = 0.08
+      end
+    end
+    if fl.life <= 0 then
+      table.remove(game.groundFlames, fi)
+    end
+  end
+
+  -- Actualizar textos flotantes
+  for ti = #(game.floatingTexts or {}), 1, -1 do
+    local ft = game.floatingTexts[ti]
+    ft.life = ft.life - dt
+    ft.y = ft.y - 25 * dt
+    if ft.life <= 0 then
+      table.remove(game.floatingTexts, ti)
+    end
+  end
+
+  -- Actualizar efectos visuales de jefes y temblor de pantalla
+  game.screenShake = math.max(0, (game.screenShake or 0) - dt * 2.5)
+  for ei = #(game.bossEffects or {}), 1, -1 do
+    local eff = game.bossEffects[ei]
+    eff.life = eff.life - dt
+    if eff.kind == "llorona_scream" or eff.kind == "silbon_whistle" then
+      eff.radius = eff.radius + ((eff.maxRadius or 180) - eff.radius) * 4 * dt
+    end
+    if eff.life <= 0 then
+      table.remove(game.bossEffects, ei)
+    end
+  end
+
+  -- Trampas de duendes
+  for ti = #(game.duendeTraps or {}), 1, -1 do
+    local tr = game.duendeTraps[ti]
+    tr.life = tr.life - dt
+    local dTr = length(game.player.x - tr.x, game.player.y - tr.y)
+    if dTr < 22 then
+      local dmg = math.floor(10 * (game.player.fearResistance or 1.0))
+      game.fear = math.min(100, game.fear + dmg)
+      table.remove(game.duendeTraps, ti)
+    elseif tr.life <= 0 then
+      table.remove(game.duendeTraps, ti)
+    end
+  end
+
+  -- Recoleccion de piedras sueltas en el suelo (soltadas por monstruos)
+  local player = game.player
+  for pi = #(game.droppedPebbles or {}), 1, -1 do
+    local peb = game.droppedPebbles[pi]
+    peb.life = (peb.life or 15) - dt
+    local distP = length(player.x - peb.x, player.y - peb.y)
+    if distP < 28 then
+      if peb.isGold then
+        game.fear = math.max(0, game.fear - 25)
+      else
+        if (player.stones or 0) < (player.maxStones or 5) then
+          player.stones = math.min(player.maxStones or 5, (player.stones or 0) + 1)
+        end
+      end
+      table.remove(game.droppedPebbles, pi)
+    elseif peb.life <= 0 then
+      table.remove(game.droppedPebbles, pi)
+    end
+  end
+
+  -- Recarga pasiva continua de piedras en el morral
+  if (player.stones or 5) < (player.maxStones or 5) then
+    player.reloadTimer = (player.reloadTimer or 0) + dt
+    local rInterval = player.reloadInterval or 0.85
+    if player.reloadTimer >= rInterval then
+      player.stones = math.min(player.maxStones or 5, (player.stones or 0) + 1)
+      player.reloadTimer = 0
     end
   else
-    game.stoneCooldown = 0
+    player.reloadTimer = 0
+  end
+
+  -- Tick continuo del cooldown de disparo (NUNCA SE RESETEA AL SOLTAR EL RATON)
+  game.stoneCooldown = math.max(0, (game.stoneCooldown or 0) - dt)
+
+  if length(game.aimInput.x, game.aimInput.y) > 0 then
+    if game.stoneCooldown <= 0 then
+      if (player.stones or 0) > 0 then
+        player.stones = player.stones - 1
+        local count = player.projectileCount or 1
+        local speed = player.stoneSpeed or 390
+        local baseVx = game.aimInput.x * speed
+        local baseVy = game.aimInput.y * speed
+        local baseAngle = math.atan2(baseVy, baseVx)
+        local spread = 0.22
+        local startAngle = baseAngle - (count - 1) * spread / 2
+
+        local hasBeastClaws = player.bossSkills and player.bossSkills["boss_cabron"]
+
+        for i = 1, count do
+          local angle = (count == 1) and baseAngle or (startAngle + (i - 1) * spread)
+          table.insert(game.stones, {
+            x = player.x,
+            y = player.y,
+            vx = math.cos(angle) * speed,
+            vy = math.sin(angle) * speed,
+            radius = (player.stoneRadius or 7) * (hasBeastClaws and 1.35 or 1.0),
+            pierce = (player.stonePierce or 1) + (hasBeastClaws and 2 or 0),
+            bounce = player.stoneBounce or 0,
+            isBeastClaw = hasBeastClaws,
+            hitEnemies = {},
+            rotation = love.math.random() * math.pi * 2,
+            spin = (love.math.random() > 0.5 and 1 or -1) * (10 + love.math.random() * 8),
+          })
+        end
+
+        -- Habilidad de Las Brujas: 2 estrellas arcanas moradas
+        if player.bossSkills and player.bossSkills["boss_brujas"] then
+          for si = 1, 2 do
+            local sAngle = baseAngle + (si == 1 and 0.42 or -0.42)
+            table.insert(game.stones, {
+              x = player.x,
+              y = player.y,
+              vx = math.cos(sAngle) * (speed * 0.95),
+              vy = math.sin(sAngle) * (speed * 0.95),
+              radius = 8,
+              pierce = 2,
+              bounce = 2,
+              isArcaneStar = true,
+              hitEnemies = {},
+              rotation = love.math.random() * math.pi * 2,
+              spin = 14,
+            })
+          end
+        end
+
+        game.stoneCooldown = player.fireCooldown or 0.38
+      else
+        player.emptyPouchFlash = 0.25
+        game.stoneCooldown = 0.16
+      end
+    end
   end
 
   local playerLeft, playerTop, playerWidth, playerHeight = playerBoundsAt(game.player.x, game.player.y)
@@ -620,10 +1353,36 @@ local function updateGame(dt)
     shot.y = shot.y + shot.vy * dt
     shot.animTime = (shot.animTime or 0) + dt
     if overlapsCircleRect(shot.x, shot.y, shot.radius, playerLeft, playerTop, playerWidth, playerHeight) then
-      local damage = math.floor(20 * (game.player.fearResistance or 1.0))
-      game.fear = math.min(100, game.fear + damage)
+      -- 4. Habilidad de Duendes: Evasion y Teletransporte de emergencia
+      local pSkills = game.player.bossSkills or {}
+      if pSkills["boss_duendes"] and love.math.random() < 0.40 then
+        addFloatingText("✦ ¡EVASION DUENDE! ✦", game.player.x, game.player.y - 30, { 0.48, 0.95, 0.45 })
+        table.insert(game.bossEffects, { kind = "duende_poof", x = game.player.x, y = game.player.y, life = 0.6 })
+        local angle = love.math.random() * math.pi * 2
+        game.player.x = clamp(game.player.x + math.cos(angle) * 115, 30, game.worldWidth - 30)
+        game.player.y = clamp(game.player.y + math.sin(angle) * 115, 50, game.worldHeight - 30)
+        table.insert(game.bossEffects, { kind = "duende_poof", x = game.player.x, y = game.player.y, life = 0.6 })
+      else
+        local damage = math.floor(20 * (game.player.fearResistance or 1.0))
+        game.fear = math.min(100, game.fear + damage)
+        -- Si llega a 100 y tiene la habilidad de Las Ánimas: Salvación del Cirio
+        if game.fear >= 100 then
+          if pSkills["boss_animas"] and not game.player.animasReviveUsed then
+            game.player.animasReviveUsed = true
+            game.fear = 35
+            game.screenShake = 0.50
+            addFloatingText("¡EL CIRIO BENDITO ABSORBIO LA DERROTA!", game.player.x, game.player.y - 50, { 1.0, 0.92, 0.50 })
+            table.insert(game.bossEffects, { kind = "player_animas_nova", x = game.player.x, y = game.player.y, radius = 30, maxRadius = 380, life = 1.2 })
+            for _, e in ipairs(game.enemies) do
+              e.hp = (e.hp or 1) - 4
+              e.hitFlash = 0.3
+            end
+          else
+            game.state = "gameover"
+          end
+        end
+      end
       table.remove(game.fearShots, index)
-      if game.fear >= 100 then game.state = "gameover" end
     elseif shot.x < 0 or shot.x > game.worldWidth or shot.y < 0 or shot.y > game.worldHeight then
       table.remove(game.fearShots, index)
     end
@@ -631,6 +1390,25 @@ local function updateGame(dt)
 
   for index = #game.stones, 1, -1 do
     local stone = game.stones[index]
+    -- Si es Estrella Arcana de Las Brujas, persigue al monstruo mas cercano
+    if stone.isArcaneStar then
+      local nearestE
+      local minStarDist = 380
+      for _, e in ipairs(game.enemies) do
+        local d = length(e.x - stone.x, e.y - stone.y)
+        if d < minStarDist then
+          minStarDist = d
+          nearestE = e
+        end
+      end
+      if nearestE then
+        local tdx, tdy = (nearestE.x - stone.x) / minStarDist, (nearestE.y - stone.y) / minStarDist
+        local curSpeed = length(stone.vx, stone.vy)
+        stone.vx = stone.vx + (tdx * curSpeed - stone.vx) * 8 * dt
+        stone.vy = stone.vy + (tdy * curSpeed - stone.vy) * 8 * dt
+      end
+    end
+
     stone.x = stone.x + stone.vx * dt
     stone.y = stone.y + stone.vy * dt
     stone.rotation = (stone.rotation or 0) + (stone.spin or 12) * dt
@@ -639,12 +1417,26 @@ local function updateGame(dt)
       local left, top = enemy.x - enemy.width / 2, enemy.y - enemy.height
       if not stone.hitEnemies[enemy] and overlapsCircleRect(stone.x, stone.y, stone.radius, left, top, enemy.width, enemy.height) then
         stone.hitEnemies[enemy] = true
-        enemy.hp = (enemy.hp or 1) - 1
-        enemy.hitFlash = 0.16
+        local dmg = stone.isBeastClaw and 2 or 1
+        enemy.hp = (enemy.hp or 1) - dmg
+        enemy.hitFlash = 0.18
+
+        -- Gran empuje si es Garra del Cambiaformas
+        if stone.isBeastClaw then
+          local sMag = length(stone.vx, stone.vy)
+          local sNormX = sMag > 0 and (stone.vx / sMag) or 1
+          local sNormY = sMag > 0 and (stone.vy / sMag) or 0
+          enemy.x = clamp(enemy.x + sNormX * 85, 20, game.worldWidth - 20)
+          enemy.y = clamp(enemy.y + sNormY * 85, 40, game.worldHeight - 20)
+        end
+
         if enemy.hp <= 0 then
           hitEnemyIndex = enemyIndex
         end
-        stone.pierce = (stone.pierce or 1) - 1
+        -- Si es Garra de Bestia tiene perforación infinita
+        if not stone.isBeastClaw then
+          stone.pierce = (stone.pierce or 1) - 1
+        end
         if stone.pierce <= 0 then
           if (stone.bounce or 0) > 0 then
             stone.bounce = stone.bounce - 1
@@ -678,6 +1470,24 @@ local function updateGame(dt)
       local defeated = game.enemies[hitEnemyIndex]
       if defeated.isBoss then
         game.fear = math.max(0, game.fear - 35)
+        game.defeatedBossReward = defeated.bossId
+      end
+      -- Soltar piedras en el suelo
+      if love.math.random() < 0.45 or (game.player.stoneDropBonus and love.math.random() < 0.9) then
+        table.insert(game.droppedPebbles, {
+          x = defeated.x,
+          y = defeated.y,
+          life = 20,
+        })
+      end
+      -- Suerte de los duendes
+      if game.player.bossSkills and game.player.bossSkills["boss_duendes"] and love.math.random() < 0.40 then
+        table.insert(game.droppedPebbles, {
+          x = defeated.x,
+          y = defeated.y,
+          isGold = true,
+          life = 15,
+        })
       end
       table.remove(game.enemies, hitEnemyIndex)
       game.enemiesDefeated = game.enemiesDefeated + 1
@@ -727,52 +1537,65 @@ end
 local function drawStone(stone)
   love.graphics.push()
   love.graphics.translate(stone.x, stone.y)
-  love.graphics.rotate(stone.rotation or 0)
-  local r = stone.radius
 
-  -- Polígono facetado irregular de piedra
-  local p1x, p1y = -r * 0.85, -r * 0.55
-  local p2x, p2y = -r * 0.25, -r * 0.95
-  local p3x, p3y =  r * 0.65, -r * 0.80
-  local p4x, p4y =  r * 0.95, -r * 0.15
-  local p5x, p5y =  r * 0.75,  r * 0.70
-  local p6x, p6y =  r * 0.10,  r * 0.95
-  local p7x, p7y = -r * 0.70,  r * 0.75
-  local p8x, p8y = -r * 0.95,  r * 0.05
+  if stone.isBeastClaw then
+    local angle = math.atan2(stone.vy, stone.vx)
+    love.graphics.rotate(angle)
+    love.graphics.setColor(1.0, 0.25, 0.10, 0.38)
+    love.graphics.circle("fill", 0, 0, stone.radius * 1.8)
+    love.graphics.setColor(1.0, 0.15, 0.12)
+    love.graphics.polygon("fill", -14, -10, 16, -6, -8, -3)
+    love.graphics.polygon("fill", -16, 0, 18, 0, -10, 3)
+    love.graphics.polygon("fill", -14, 10, 16, 6, -8, 3)
+    love.graphics.setColor(1.0, 0.88, 0.30)
+    love.graphics.polygon("fill", -8, -3, 10, 0, -8, 3)
+  elseif stone.isArcaneStar then
+    love.graphics.rotate(stone.rotation or 0)
+    love.graphics.setColor(0.85, 0.30, 1.0, 0.40)
+    love.graphics.circle("fill", 0, 0, 14)
+    love.graphics.setColor(0.95, 0.60, 1.0)
+    love.graphics.polygon("fill", 0, -12, 3, -3, 12, 0, 3, 3, 0, 12, -3, 3, -12, 0, -3, -3)
+    love.graphics.setColor(1, 1, 1, 0.95)
+    love.graphics.circle("fill", 0, 0, 3)
+  else
+    love.graphics.rotate(stone.rotation or 0)
+    local r = stone.radius
+    local p1x, p1y = -r * 0.85, -r * 0.55
+    local p2x, p2y = -r * 0.25, -r * 0.95
+    local p3x, p3y =  r * 0.65, -r * 0.80
+    local p4x, p4y =  r * 0.95, -r * 0.15
+    local p5x, p5y =  r * 0.75,  r * 0.70
+    local p6x, p6y =  r * 0.10,  r * 0.95
+    local p7x, p7y = -r * 0.70,  r * 0.75
+    local p8x, p8y = -r * 0.95,  r * 0.05
 
-  -- Cuerpo base rocoso (gris granito medio)
-  love.graphics.setColor(0.48, 0.46, 0.44)
-  love.graphics.polygon("fill", p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y, p5x, p5y, p6x, p6y, p7x, p7y, p8x, p8y)
+    love.graphics.setColor(0.48, 0.46, 0.44)
+    love.graphics.polygon("fill", p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y, p5x, p5y, p6x, p6y, p7x, p7y, p8x, p8y)
 
-  -- Faceta de sombra inferior-derecha (gris pizarra oscuro)
-  love.graphics.setColor(0.28, 0.27, 0.26)
-  love.graphics.polygon("fill", 0, 0, p4x, p4y, p5x, p5y, p6x, p6y)
-  love.graphics.polygon("fill", 0, 0, p6x, p6y, p7x, p7y)
+    love.graphics.setColor(0.28, 0.27, 0.26)
+    love.graphics.polygon("fill", 0, 0, p4x, p4y, p5x, p5y, p6x, p6y)
+    love.graphics.polygon("fill", 0, 0, p6x, p6y, p7x, p7y)
 
-  -- Faceta iluminada superior-izquierda (gris claro granítico)
-  love.graphics.setColor(0.68, 0.66, 0.63)
-  love.graphics.polygon("fill", 0, 0, p1x, p1y, p2x, p2y, p3x, p3y)
+    love.graphics.setColor(0.68, 0.66, 0.63)
+    love.graphics.polygon("fill", 0, 0, p1x, p1y, p2x, p2y, p3x, p3y)
 
-  -- Resaltado brillante en la arista superior
-  love.graphics.setColor(0.82, 0.80, 0.77)
-  love.graphics.polygon("fill", 0, 0, p2x, p2y, p3x * 0.7, p3y * 0.7)
+    love.graphics.setColor(0.82, 0.80, 0.77)
+    love.graphics.polygon("fill", 0, 0, p2x, p2y, p3x * 0.7, p3y * 0.7)
 
-  -- Grietas y texturas minerales sobre la roca
-  love.graphics.setColor(0.20, 0.19, 0.18, 0.85)
-  love.graphics.setLineWidth(1)
-  love.graphics.line(0, 0, p1x * 0.7, p1y * 0.7)
-  love.graphics.line(0, 0, p5x * 0.75, p5y * 0.75)
-  love.graphics.line(p2x * 0.5, p2y * 0.5, p8x * 0.5, p8y * 0.5)
+    love.graphics.setColor(0.20, 0.19, 0.18, 0.85)
+    love.graphics.setLineWidth(1)
+    love.graphics.line(0, 0, p1x * 0.7, p1y * 0.7)
+    love.graphics.line(0, 0, p5x * 0.75, p5y * 0.75)
+    love.graphics.line(p2x * 0.5, p2y * 0.5, p8x * 0.5, p8y * 0.5)
 
-  -- Motas minerales blancas y oscuras
-  love.graphics.setColor(0.90, 0.88, 0.85, 0.8)
-  love.graphics.points(r * 0.25, -r * 0.2, -r * 0.3, r * 0.15)
-  love.graphics.setColor(0.15, 0.14, 0.13, 0.8)
-  love.graphics.points(-r * 0.1, -r * 0.4, r * 0.35, r * 0.3)
+    love.graphics.setColor(0.90, 0.88, 0.85, 0.8)
+    love.graphics.points(r * 0.25, -r * 0.2, -r * 0.3, r * 0.15)
+    love.graphics.setColor(0.15, 0.14, 0.13, 0.8)
+    love.graphics.points(-r * 0.1, -r * 0.4, r * 0.35, r * 0.3)
 
-  -- Contorno rocoso biselado
-  love.graphics.setColor(0.24, 0.23, 0.22)
-  love.graphics.polygon("line", p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y, p5x, p5y, p6x, p6y, p7x, p7y, p8x, p8y)
+    love.graphics.setColor(0.24, 0.23, 0.22)
+    love.graphics.polygon("line", p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y, p5x, p5y, p6x, p6y, p7x, p7y, p8x, p8y)
+  end
 
   love.graphics.pop()
 end
@@ -1403,107 +2226,120 @@ local function drawVenezuelanBoss(enemy)
 
   elseif id == "el_cabron" then
     -- =========================================================================
-    -- 3. EL CABRÓN LEYENDARIO (Bestia cornuda imponente con gran machete)
+    -- 3. EL CAMBIAFORMAS: Bestia salvaje feroz (SIN MACHETE Y SIN MORRAL)
     -- =========================================================================
-    -- Sombra densa y pesada en el suelo
-    love.graphics.setColor(0.08, 0.02, 0.03, 0.7)
-    love.graphics.ellipse("fill", 0, 0, 26, 8)
+    local isCharging = (enemy.state == "charge")
+    local isFatigued = (enemy.state == "fatigue")
 
-    -- Patas digitígradas musculosas de macho cabrío con pelaje espeso
-    -- Pata izquierda
-    love.graphics.setColor(0.18, 0.12, 0.10)
+    -- Sombra pesada en el suelo
+    love.graphics.setColor(0.12, 0.02, 0.04, 0.75)
+    love.graphics.ellipse("fill", 0, 0, 28, 9)
+
+    -- Aura ardiente de furia si esta embistiendo
+    if isCharging then
+      local chargePulse = 1.0 + math.sin(t * 8) * 0.18
+      love.graphics.setColor(1.0, 0.25, 0.10, 0.35)
+      love.graphics.ellipse("fill", 0, -26, 38 * chargePulse, 46 * chargePulse)
+      love.graphics.setColor(1.0, 0.65, 0.20, 0.22)
+      love.graphics.ellipse("fill", 0, -26, 48 * chargePulse, 56 * chargePulse)
+    end
+
+    -- Patas digitigradas musculosas con pezunas hendidas pesadas
+    love.graphics.setColor(0.18, 0.10, 0.08)
     love.graphics.polygon("fill", -13, -18, -16 + swing, 0, -9 + swing, 0, -7, -18)
-    -- Pata derecha
-    love.graphics.setColor(0.24, 0.16, 0.12)
+    love.graphics.setColor(0.24, 0.14, 0.10)
     love.graphics.polygon("fill", 7, -18, 9 - swing, 0, 16 - swing, 0, 13, -18)
-    -- Pezuñas hendidas pesadas con hendidura central
-    love.graphics.setColor(0.06, 0.04, 0.04)
+    -- Pezunas negras pesadas con hendidura
+    love.graphics.setColor(0.06, 0.03, 0.03)
     love.graphics.rectangle("fill", -16 + swing, -3.5, 7, 3.5, 1, 1)
     love.graphics.rectangle("fill", 9 - swing, -3.5, 7, 3.5, 1, 1)
-    love.graphics.setColor(0.45, 0.35, 0.30)
-    love.graphics.line(-12.5 + swing, -3.5, -12.5 + swing, 0)
-    love.graphics.line(12.5 - swing, -3.5, 12.5 - swing, 0)
 
     love.graphics.push()
     love.graphics.translate(0, -bob)
 
-    -- Torso ancho y musculoso con pelaje negro y marrón rojizo
-    love.graphics.setColor(0.20, 0.14, 0.11)
-    love.graphics.rectangle("fill", -15, -40, 30, 26, 7, 7)
-    love.graphics.setColor(0.30, 0.20, 0.15)
-    love.graphics.rectangle("fill", -13, -38, 26, 22, 5, 5)
-    -- Pectorales y abdominales marcados
-    love.graphics.setColor(0.15, 0.10, 0.08)
-    love.graphics.line(0, -38, 0, -18)
-    love.graphics.line(-10, -28, 10, -28)
+    -- Torso bestial hipertrofiado con pelaje espeso oscuro y pecho robusto
+    love.graphics.setColor(0.22, 0.12, 0.09)
+    love.graphics.rectangle("fill", -16, -42, 32, 28, 8, 8)
+    love.graphics.setColor(0.32, 0.18, 0.13)
+    love.graphics.rectangle("fill", -13, -39, 26, 23, 6, 6)
+    -- Definicion muscular en el pecho
+    love.graphics.setColor(0.14, 0.08, 0.06)
+    love.graphics.line(0, -39, 0, -18)
+    love.graphics.line(-10, -29, 10, -29)
     love.graphics.line(-8, -23, 8, -23)
-    -- Mechones de pelaje espeso en los hombros
-    love.graphics.setColor(0.14, 0.09, 0.07)
-    love.graphics.polygon("fill", -15, -38, -19, -42, -14, -34)
-    love.graphics.polygon("fill", 15, -38, 19, -42, 14, -34)
+    -- Mechones de pelaje salvaje en hombros y espalda
+    love.graphics.setColor(0.16, 0.09, 0.07)
+    love.graphics.polygon("fill", -16, -40, -22, -45, -15, -34)
+    love.graphics.polygon("fill", 16, -40, 22, -45, 15, -34)
+    love.graphics.polygon("fill", -14, -30, -20, -34, -13, -26)
+    love.graphics.polygon("fill", 14, -30, 20, -34, 13, -26)
 
-    -- Morral / zurrón de cuero envejecido cruzado en diagonal con correa y hebilla
-    love.graphics.setColor(0.48, 0.28, 0.14)
-    love.graphics.setLineWidth(3)
-    love.graphics.line(-14, -38, 12, -22)
-    love.graphics.setLineWidth(1)
-    love.graphics.rectangle("fill", 8, -26, 10, 10, 2, 2)
-    love.graphics.setColor(0.85, 0.70, 0.30)
-    love.graphics.rectangle("line", 11, -23, 4, 4) -- Hebilla de latón
+    -- Brazos musculosos de bestia con garras negras afiladas (SIN ARMA NI BOLSO)
+    -- Brazo izquierdo
+    love.graphics.setColor(0.24, 0.14, 0.10)
+    love.graphics.polygon("fill", -15, -38, -24, -22, -18, -20, -11, -34)
+    -- Garras brazo izquierdo
+    love.graphics.setColor(0.06, 0.03, 0.03)
+    love.graphics.polygon("fill", -24, -22, -28, -17, -22, -19)
+    love.graphics.polygon("fill", -21, -20, -25, -15, -19, -18)
 
-    -- Brazo derecho musculoso que empuña el Gran Machete
-    love.graphics.setColor(0.24, 0.16, 0.12)
-    love.graphics.line(14, -36, 20, -24)
-    love.graphics.circle("fill", 20, -24, 3.5)
-    -- Empuñadura de madera oscura con remaches de latón
-    love.graphics.setColor(0.35, 0.18, 0.08)
-    love.graphics.rectangle("fill", 19, -26, 5, 3.5, 1, 1)
-    love.graphics.setColor(0.95, 0.80, 0.30)
-    love.graphics.circle("fill", 20, -24, 1)
-    love.graphics.circle("fill", 23, -24, 1)
-    -- Gran Hoja de Machete Plateada con filo reflectante
-    love.graphics.setColor(0.85, 0.88, 0.94)
-    love.graphics.polygon("fill", 22, -27, 36, -42, 40, -38, 24, -23)
-    love.graphics.setColor(1.0, 1.0, 1.0, 0.9)
-    love.graphics.line(22, -27, 36, -42) -- Filo reluciente
-    -- Muesca de batalla en el machete
-    love.graphics.setColor(0.4, 0.4, 0.45)
-    love.graphics.line(29, -34, 31, -34)
+    -- Brazo derecho (brazo de zarpazo)
+    love.graphics.setColor(0.28, 0.16, 0.12)
+    local rArmY = isCharging and (-18 + math.sin(t * 8) * 6) or -22
+    love.graphics.polygon("fill", 14, -38, 26, rArmY, 21, rArmY + 4, 11, -34)
+    -- Garras negras afiladas con punta carmesi
+    love.graphics.setColor(0.06, 0.03, 0.03)
+    love.graphics.polygon("fill", 26, rArmY, 32, rArmY - 4, 26, rArmY + 3)
+    love.graphics.polygon("fill", 24, rArmY + 3, 30, rArmY, 24, rArmY + 6)
+    love.graphics.polygon("fill", 22, rArmY + 6, 27, rArmY + 4, 21, rArmY + 9)
+    love.graphics.setColor(1.0, 0.20, 0.15)
+    love.graphics.circle("fill", 32, rArmY - 4, 1.4) -- Sangre/furia en la punta de la garra
+    love.graphics.circle("fill", 30, rArmY, 1.4)
 
-    -- Cabeza de macho cabrío negro
-    love.graphics.setColor(0.18, 0.12, 0.10)
-    love.graphics.circle("fill", 0, -46, 11)
-    -- Hocico y barba de chivo larga
-    love.graphics.setColor(0.12, 0.08, 0.06)
-    love.graphics.polygon("fill", -6, -42, 6, -42, 2, -31, -2, -31)
-    love.graphics.setColor(0.28, 0.18, 0.14)
-    love.graphics.polygon("fill", -3, -33, 3, -33, 0, -26) -- Barba
+    -- Efecto visual de zarpazo arqueado al embestir
+    if isCharging then
+      love.graphics.setColor(1.0, 0.25, 0.15, 0.85)
+      love.graphics.setLineWidth(3.5)
+      love.graphics.arc("line", 22, rArmY, 16, -0.6, 0.8)
+      love.graphics.setLineWidth(1)
+    end
 
-    -- Enormes Cuernos Curvados Retorcidos de Macho Cabrío
-    love.graphics.setColor(0.28, 0.22, 0.18)
-    love.graphics.polygon("fill", -8, -52, -22, -68, -14, -71, -3, -53)
-    love.graphics.polygon("fill", 8, -52, 22, -68, 14, -71, 3, -53)
-    -- Anillos de relieve y textura de queratina en los cuernos
-    love.graphics.setColor(0.48, 0.38, 0.30)
-    love.graphics.line(-7, -54, -9, -58)
-    love.graphics.line(-11, -60, -14, -64)
-    love.graphics.line(7, -54, 9, -58)
-    love.graphics.line(11, -60, 14, -64)
-    love.graphics.line(-16, -67, -19, -70)
-    love.graphics.line(16, -67, 19, -70)
+    -- Cabeza de bestia cornuda / macho cabrio demoniaco
+    love.graphics.setColor(0.20, 0.12, 0.09)
+    love.graphics.circle("fill", 0, -48, 12)
+    -- Hocico de fiera y barba de chivo
+    love.graphics.setColor(0.14, 0.08, 0.06)
+    love.graphics.polygon("fill", -7, -44, 7, -44, 3, -32, -3, -32)
+    love.graphics.setColor(0.28, 0.16, 0.12)
+    love.graphics.polygon("fill", -3, -34, 3, -34, 0, -26) -- Barba
 
-    -- Ojos rojos demoníacos incandescentes con destello
-    love.graphics.setColor(1.0, 0.15, 0.15)
-    love.graphics.circle("fill", -4.5, -47, 3)
-    love.graphics.circle("fill", 4.5, -47, 3)
-    love.graphics.setColor(1.0, 0.85, 0.20)
-    love.graphics.circle("fill", -4.5, -47, 1.2)
-    love.graphics.circle("fill", 4.5, -47, 1.2)
-    love.graphics.setColor(1, 1, 1, 0.95)
-    love.graphics.circle("fill", -5, -48, 0.7)
-    love.graphics.circle("fill", 4, -48, 0.7)
+    -- Colmillos de fiera
+    love.graphics.setColor(0.96, 0.94, 0.88)
+    love.graphics.polygon("fill", -4, -40, -2, -40, -3, -36)
+    love.graphics.polygon("fill", 2, -40, 4, -40, 3, -36)
 
-    -- Brasas ardientes cayendo del cuerpo
+    -- Enormes Cuernos Curvados Retorcidos con anillos
+    love.graphics.setColor(0.28, 0.20, 0.16)
+    love.graphics.polygon("fill", -8, -54, -24, -72, -15, -75, -3, -55)
+    love.graphics.polygon("fill", 8, -54, 24, -72, 15, -75, 3, -55)
+    love.graphics.setColor(0.48, 0.36, 0.28)
+    love.graphics.line(-7, -56, -10, -60)
+    love.graphics.line(-12, -62, -16, -66)
+    love.graphics.line(7, -56, 10, -60)
+    love.graphics.line(12, -62, 16, -66)
+
+    -- Ojos de fiera incandescentes (amarillo fuego y rojo sangre)
+    love.graphics.setColor(1.0, 0.15, 0.10)
+    love.graphics.circle("fill", -5, -49, 3.2)
+    love.graphics.circle("fill", 5, -49, 3.2)
+    love.graphics.setColor(1.0, 0.88, 0.20)
+    love.graphics.circle("fill", -5, -49, 1.4)
+    love.graphics.circle("fill", 5, -49, 1.4)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.circle("fill", -5.5, -50, 0.7)
+    love.graphics.circle("fill", 4.5, -50, 0.7)
+
+    -- Brasas ardientes cayendo
     local emberY = -28 + (t * 8 % 16)
     love.graphics.setColor(1.0, 0.40, 0.10, 0.75)
     love.graphics.circle("fill", -12 + math.sin(t * 3) * 4, emberY, 1.5)
@@ -1774,6 +2610,13 @@ local function drawVenezuelanBoss(enemy)
 end
 
 local function drawEnemy(enemy)
+  if enemy.stunTimer and enemy.stunTimer > 0 then
+    -- Resplandor dorado de aturdimiento sobre la cabeza
+    love.graphics.setColor(1.0, 0.88, 0.35, 0.85)
+    love.graphics.setFont(game.fonts.small)
+    love.graphics.printf("♫ ♪ ♫", enemy.x - 30, enemy.y - 48, 60, "center")
+  end
+
   if enemy.isBoss then
     drawVenezuelanBoss(enemy)
     return
@@ -1930,9 +2773,74 @@ end
 
 local function drawWorld()
   game.cameraX, game.cameraY = cameraOffset()
+  local shakeX = (game.screenShake or 0) > 0 and ((love.math.random() - 0.5) * 16 * game.screenShake) or 0
+  local shakeY = (game.screenShake or 0) > 0 and ((love.math.random() - 0.5) * 16 * game.screenShake) or 0
+
   love.graphics.push()
-  love.graphics.translate(-game.cameraX, -game.cameraY)
+  love.graphics.translate(-game.cameraX + shakeX, -game.cameraY + shakeY)
   drawGround()
+
+  -- Dibujar llamas en el suelo (Garras del Cambiaformas)
+  for _, fl in ipairs(game.groundFlames or {}) do
+    love.graphics.setColor(1.0, 0.40, 0.10, 0.45 * math.min(1.0, fl.life))
+    love.graphics.circle("fill", fl.x, fl.y, 14)
+    love.graphics.setColor(1.0, 0.85, 0.20, 0.85 * math.min(1.0, fl.life))
+    love.graphics.circle("fill", fl.x, fl.y, 6)
+  end
+
+  -- Dibujar piedras sueltas y pepitas de oro en el suelo
+  for _, peb in ipairs(game.droppedPebbles or {}) do
+    if peb.isGold then
+      -- Pepita de oro brillante
+      love.graphics.setColor(1.0, 0.85, 0.20)
+      love.graphics.circle("fill", peb.x, peb.y, 6)
+      love.graphics.setColor(1, 1, 1, 0.8)
+      love.graphics.circle("fill", peb.x - 1.5, peb.y - 1.5, 2.2)
+    else
+      -- Guijarro de río
+      love.graphics.setColor(0.65, 0.62, 0.58)
+      love.graphics.ellipse("fill", peb.x, peb.y, 5, 3.5)
+      love.graphics.setColor(0.85, 0.82, 0.78)
+      love.graphics.points(peb.x - 1, peb.y - 1)
+    end
+  end
+
+  -- Dibujar trampas de hongos de duendes
+  for _, tr in ipairs(game.duendeTraps or {}) do
+    love.graphics.setColor(0.95, 0.25, 0.20)
+    love.graphics.arc("fill", tr.x, tr.y, 8, math.pi, math.pi * 2)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.circle("fill", tr.x - 3, tr.y - 4, 1.4)
+    love.graphics.circle("fill", tr.x + 3, tr.y - 4, 1.4)
+  end
+
+  -- Dibujar efectos expansivos (Silbato, Alarido de Llorona, Nova de Ánimas, etc.)
+  for _, eff in ipairs(game.bossEffects or {}) do
+    if eff.kind == "player_silbon_whistle" or eff.kind == "silbon_whistle" then
+      love.graphics.setColor(1.0, 0.88, 0.35, 0.40 * math.min(1.0, eff.life))
+      love.graphics.circle("line", eff.x, eff.y, eff.radius)
+      love.graphics.circle("line", eff.x, eff.y, eff.radius * 0.75)
+    elseif eff.kind == "player_llorona_tsunami" or eff.kind == "llorona_scream" then
+      love.graphics.setColor(0.40, 0.85, 1.0, 0.50 * math.min(1.0, eff.life))
+      love.graphics.setLineWidth(3)
+      love.graphics.circle("line", eff.x, eff.y, eff.radius)
+      love.graphics.setLineWidth(1)
+      love.graphics.setColor(0.60, 0.95, 1.0, 0.18 * math.min(1.0, eff.life))
+      love.graphics.circle("fill", eff.x, eff.y, eff.radius)
+    elseif eff.kind == "player_animas_nova" then
+      love.graphics.setColor(1.0, 0.95, 0.65, 0.60 * math.min(1.0, eff.life))
+      love.graphics.circle("fill", eff.x, eff.y, eff.radius)
+    elseif eff.kind == "duende_poof" then
+      love.graphics.setColor(0.45, 0.95, 0.45, 0.65 * math.min(1.0, eff.life))
+      love.graphics.circle("fill", eff.x, eff.y, 18)
+    elseif eff.kind == "claw_slash" then
+      love.graphics.setColor(1.0, 0.20, 0.15, 0.85 * math.min(1.0, eff.life))
+      love.graphics.setLineWidth(4)
+      love.graphics.line(eff.x - 16, eff.y - 12, eff.x + 16, eff.y + 12)
+      love.graphics.line(eff.x - 12, eff.y - 16, eff.x + 20, eff.y + 8)
+      love.graphics.setLineWidth(1)
+    end
+  end
 
   for _, shot in ipairs(game.fearShots) do
     drawFearShot(shot)
@@ -1947,6 +2855,30 @@ local function drawWorld()
   for _, enemy in ipairs(game.enemies) do table.insert(drawOrder, { entity = enemy, draw = drawEnemy }) end
   table.sort(drawOrder, function(a, b) return a.entity.y < b.entity.y end)
   for _, item in ipairs(drawOrder) do item.draw(item.entity) end
+
+  -- Dibujar Cirio Santo Orbitante si tiene la habilidad de Las Ánimas
+  if game.player.bossSkills and game.player.bossSkills["boss_animas"] then
+    local cx = game.player.x + math.cos(game.player.candleAngle or 0) * 65
+    local cy = game.player.y + math.sin(game.player.candleAngle or 0) * 65
+    -- Halo de luz del cirio
+    love.graphics.setColor(1.0, 0.88, 0.35, 0.28)
+    love.graphics.circle("fill", cx, cy, 32)
+    -- Cirio de cera blanca
+    love.graphics.setColor(0.95, 0.92, 0.85)
+    love.graphics.rectangle("fill", cx - 2.5, cy - 8, 5, 14, 1, 1)
+    -- Llama dorada viva
+    love.graphics.setColor(1.0, 0.85, 0.20)
+    love.graphics.polygon("fill", cx - 2.5, cy - 8, cx + 2.5, cy - 8, cx, cy - 18)
+    love.graphics.setColor(1.0, 1.0, 0.8)
+    love.graphics.circle("fill", cx, cy - 10, 2)
+  end
+
+  -- Dibujar textos flotantes en el mundo
+  for _, ft in ipairs(game.floatingTexts or {}) do
+    love.graphics.setFont(game.fonts.button)
+    love.graphics.setColor(ft.col[1], ft.col[2], ft.col[3], math.min(1.0, ft.life))
+    love.graphics.printf(ft.text, ft.x - 150, ft.y, 300, "center")
+  end
 
   -- Luciérnagas flotantes en la noche
   local t = game.elapsed or 0
@@ -2126,6 +3058,82 @@ local function drawHud()
   love.graphics.rectangle("fill", barX + 12, 99, barWidth - 24, 8, 4, 4)
   love.graphics.setColor(fearColor[1], fearColor[2], fearColor[3])
   love.graphics.rectangle("fill", barX + 12, 99, (barWidth - 24) * game.fear / 100, 8, 4, 4)
+
+  -- 2.1 MORRAL DE PIEDRAS DEL NINO (Municion y Recarga en tiempo real)
+  local pouchY = 126
+  local pStones = game.player.stones or 0
+  local pMax = game.player.maxStones or 5
+  local isFlash = (game.player.emptyPouchFlash or 0) > 0
+  if game.player.emptyPouchFlash and game.player.emptyPouchFlash > 0 then
+    game.player.emptyPouchFlash = game.player.emptyPouchFlash - (dt or 0.016)
+  end
+
+  love.graphics.setColor(isFlash and { 0.30, 0.06, 0.10, 0.94 } or { 0.06, 0.09, 0.11, 0.88 })
+  love.graphics.rectangle("fill", barX, pouchY, barWidth, 38, 8, 8)
+  love.graphics.setColor(isFlash and { 1.0, 0.35, 0.35, 0.95 } or { 0.85, 0.72, 0.45, 0.65 })
+  love.graphics.setLineWidth(1)
+  love.graphics.rectangle("line", barX, pouchY, barWidth, 38, 8, 8)
+
+  love.graphics.setFont(game.fonts.small)
+  love.graphics.setColor(0.92, 0.92, 0.88)
+  love.graphics.print("Morral: " .. pStones .. "/" .. pMax, barX + 10, pouchY + 5)
+
+  -- Iconos de piedras dibujadas
+  local iconStartX = barX + 105
+  for ii = 1, pMax do
+    local ix = iconStartX + (ii - 1) * 16
+    local iy = pouchY + 11
+    if ii <= pStones then
+      love.graphics.setColor(0.96, 0.88, 0.68)
+      love.graphics.circle("fill", ix, iy, 5.5)
+      love.graphics.setColor(0.55, 0.45, 0.30)
+      love.graphics.circle("line", ix, iy, 5.5)
+      love.graphics.setColor(1, 1, 1, 0.7)
+      love.graphics.circle("fill", ix - 1.5, iy - 1.5, 1.8)
+    else
+      love.graphics.setColor(0.20, 0.25, 0.28, 0.45)
+      love.graphics.circle("fill", ix, iy, 4.5)
+      love.graphics.setColor(0.40, 0.48, 0.50, 0.6)
+      love.graphics.circle("line", ix, iy, 4.5)
+    end
+  end
+
+  -- Barra de recarga pasiva de la siguiente piedra
+  if pStones < pMax then
+    local rPct = clamp((game.player.reloadTimer or 0) / (game.player.reloadInterval or 0.85), 0, 1)
+    love.graphics.setColor(0.12, 0.18, 0.20, 0.8)
+    love.graphics.rectangle("fill", barX + 10, pouchY + 26, barWidth - 20, 5, 2, 2)
+    love.graphics.setColor(0.45, 0.90, 0.70)
+    love.graphics.rectangle("fill", barX + 10, pouchY + 26, (barWidth - 20) * rPct, 5, 2, 2)
+  else
+    love.graphics.setFont(game.fonts.badge or game.fonts.small)
+    love.graphics.setColor(0.45, 0.85, 0.60, 0.85)
+    love.graphics.print("MORRAL LLENO", barX + 14, pouchY + 22)
+  end
+
+  -- 2.2 HABILIDADES DE JEFE ACTIVAS (Insignias doradas en el lateral)
+  local activeBossSkills = {}
+  if game.player.bossSkills then
+    for skId, _ in pairs(game.player.bossSkills) do
+      table.insert(activeBossSkills, skId)
+    end
+  end
+  if #activeBossSkills > 0 then
+    local bShelfX = width - 170
+    local bShelfY = 88
+    love.graphics.setColor(0.06, 0.08, 0.10, 0.85)
+    love.graphics.rectangle("fill", bShelfX, bShelfY, 154, 24 + #activeBossSkills * 20, 8, 8)
+    love.graphics.setColor(1.0, 0.84, 0.25, 0.75)
+    love.graphics.rectangle("line", bShelfX, bShelfY, 154, 24 + #activeBossSkills * 20, 8, 8)
+    love.graphics.setFont(game.fonts.badge or game.fonts.small)
+    love.graphics.setColor(1.0, 0.88, 0.35)
+    love.graphics.print("HABILIDADES ANCESTRALES", bShelfX + 8, bShelfY + 6)
+    for bsi, bskId in ipairs(activeBossSkills) do
+      local bName = bskId:gsub("boss_", ""):upper()
+      love.graphics.setColor(0.85, 0.92, 0.95)
+      love.graphics.print("✦ " .. bName, bShelfX + 12, bShelfY + 8 + bsi * 18)
+    end
+  end
 
   -- 3. Información de Oleada y progreso de enemigos (esquina superior izquierda)
   local isBossWave = ((game.wave or 1) % 5 == 0)
@@ -2597,6 +3605,8 @@ local function upgradeCardRect(index)
 end
 
 local UPGRADE_COLORS = {
+  ["HABILIDAD DE JEFE"] = { 1.00, 0.84, 0.25 },
+  MUNICION = { 0.85, 0.72, 0.45 },
   OFENSIVA = { 0.95, 0.32, 0.30 },
   CADENCIA = { 0.30, 0.82, 0.95 },
   MOVILIDAD = { 0.40, 0.92, 0.55 },
@@ -2704,22 +3714,27 @@ local function drawUpgradeMenu()
       local isHover = isInsideRect(mx, my, cx, cy, cw, ch)
       local catColor = UPGRADE_COLORS[opt.category] or { 0.48, 0.95, 0.65 }
 
+      local isBossCard = opt.isBossSkill
+      if isBossCard then
+        catColor = { 1.0, 0.84, 0.25 }
+      end
+
       -- Sombra de la tarjeta
       love.graphics.setColor(0.0, 0.0, 0.0, 0.55)
       love.graphics.rectangle("fill", cx, cy + 6, cw, ch, 14, 14)
 
       -- Fondo de la tarjeta
       if isHover then
-        love.graphics.setColor(0.06, 0.14, 0.12, 0.96)
+        love.graphics.setColor(isBossCard and { 0.18, 0.14, 0.05, 0.98 } or { 0.06, 0.14, 0.12, 0.96 })
         love.graphics.rectangle("fill", cx - 2, cy - 3, cw + 4, ch + 6, 14, 14)
-        love.graphics.setColor(catColor[1], catColor[2], catColor[3], 0.95)
-        love.graphics.setLineWidth(2)
+        love.graphics.setColor(catColor[1], catColor[2], catColor[3], 0.98)
+        love.graphics.setLineWidth(isBossCard and 3 or 2)
         love.graphics.rectangle("line", cx - 2, cy - 3, cw + 4, ch + 6, 14, 14)
       else
-        love.graphics.setColor(0.04, 0.08, 0.08, 0.92)
+        love.graphics.setColor(isBossCard and { 0.12, 0.09, 0.03, 0.94 } or { 0.04, 0.08, 0.08, 0.92 })
         love.graphics.rectangle("fill", cx, cy, cw, ch, 12, 12)
-        love.graphics.setColor(catColor[1], catColor[2], catColor[3], 0.38)
-        love.graphics.setLineWidth(1)
+        love.graphics.setColor(catColor[1], catColor[2], catColor[3], isBossCard and 0.85 or 0.38)
+        love.graphics.setLineWidth(isBossCard and 2 or 1)
         love.graphics.rectangle("line", cx, cy, cw, ch, 12, 12)
       end
 
